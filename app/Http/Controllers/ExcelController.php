@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Imports\FazendasImport;
+use Illuminate\Support\Facades\Storage;
 
 class ExcelController extends Controller
 {
@@ -26,7 +27,7 @@ class ExcelController extends Controller
 
 
    public function downloadModelo(){
-    $arquivoExcel = 'uploads/Modelo_Dados.xlsx';
+    $arquivoExcel = 'uploads\Modelo_Dados.xlsx';
 
     if (!Storage::disk('public')->exists($arquivoExcel)) {
         abort(404, 'Arquivo modelo não encontrado.');
