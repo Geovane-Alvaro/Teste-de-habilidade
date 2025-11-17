@@ -20,7 +20,7 @@
     </div>
 
 
-    <table class="table table-striped table-hover align-middle">
+    <table class="table table-striped table-hover align-middle text-uppercase">
         <thead class="table-dark">
             <tr>
                 <th>ID</th>
@@ -41,12 +41,12 @@
                     <td>{{ $f->idFazenda }}</td>
                     <td>{{ $f->setor }}</td>
                     <td>{{ $f->fazenda }}</td>
-                    <td>{{ $f->talhao }}</td>
+                    <td>{{ str_pad($f->talhao, 3, '0', STR_PAD_LEFT) }}</td>
                     <td>{{ $f->variedade }}</td>
                     <td>{{ $f->corte }}</td>
                     <td>{{ $f->area }}</td>
                     <td>{{ $f->insumo == 1? 'Possui': 'Não possui' }}</td>
-                    <td>{{ $f->dataPlantio }}</td>
+                    <td>{{ \Carbon\Carbon::parse($f->dataPlantio)->format('d/m/Y') }}</td>
                     <td>
                         <a href="{{ route('rotafazenda.edit', $f->idFazenda) }}" class="btn btn-warning btn-sm">Editar</a>
 
@@ -64,4 +64,7 @@
             @endforelse
         </tbody>
     </table>
+    <div class="mt-3">
+    {{ $fazendas->links('pagination::bootstrap-5') }}
+    </div>
 @endsection

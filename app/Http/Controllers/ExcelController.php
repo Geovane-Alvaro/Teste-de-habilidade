@@ -25,13 +25,15 @@ class ExcelController extends Controller
     }
 
 
-    public function downloadModelo(){
-        $caminho = public_path('storage/uploads/Modelo_Dados.xlsx');
+   public function downloadModelo(){
+    $arquivoExcel = 'uploads/Modelo_Dados.xlsx';
 
-        if (!file_exists($caminho)) {
-            abort(404, 'Arquivo modelo não encontrado.');
-        }
-
-        return response()->download($caminho);
+    if (!Storage::disk('public')->exists($arquivoExcel)) {
+        abort(404, 'Arquivo modelo não encontrado.');
     }
+
+    $caminho = Storage::disk('public')->path($arquivoExcel);
+
+    return response()->download($caminho);
+}
 }

@@ -12,7 +12,7 @@ class RotafazendaController extends Controller
      */
     public function index()
     {
-        $fazendas = Rotafazenda::all();
+        $fazendas = Rotafazenda::paginate(15);
 
         $mensagemSucesso = session('mensagem.sucesso');
 
