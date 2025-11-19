@@ -1,0 +1,157 @@
+@font-face {
+    font-family: 'RedHatDisplay';
+    src: url('../fonts/Red_Hat_Display/RedHatDisplay-Regular.ttf') format('truetype');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'RedHatDisplay';
+    src: url('../fonts/Red_Hat_Display/RedHatDisplay-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: 'RedHatDisplay';
+    src: url('../fonts/Red_Hat_Display/RedHatDisplay-Bold.ttf') format('truetype');
+    font-weight: 700;
+}
+ 
+body {
+    font-family: 'RedHat', 'RedHatDisplay';
+    background-color: var(--background-default);
+
+}
+
+.btn i {
+    margin: auto;
+    font-size: 1rem;
+}
+
+:root{
+        --primary-main:#445765;
+        --primary-light: #697883;
+        --primary-dark: #2F3C46;
+        --primary-contrastText: rgba(245,245,245,0.87);
+        
+        --secondary-main: #808080;
+        --secondary-light: #A8A8A8;
+        --secondary-dark: #5C5C5C;
+        --secondary-contrastText: #fff;
+        
+        --error-main: #d32f2f;
+        --error-light: #ef5350;
+        --error-dark: #c62828;
+        --error-contrastText: #fff;
+        
+        --warning-main: #FF9800;
+        --warning-light: #FFB74D;
+        --warning-dark: #F57C00;
+        --warning-contrastText: #fff;
+
+        --info-main: #2196F3;
+        --indo-light: #64B5F6;
+        --info-dark: #1976D2;
+        --info-contrastText: #fff;
+        
+        --success-main: #4CAF50;
+        --success-light: #81C784;
+        --seccess-dark: #388E3C;
+        --success-contrastText: #fff;
+        
+        --rose-main: #cc5c5c;
+        --rose-light:#FF7173;
+        --rose-dark: #AD4D4E;
+        --rose-contrastText: #fff;
+        
+        --divider: #8A8A8A;
+
+        --background-default: #F7F7F7;
+        --backgroud-paper: #eeeeee;
+    
+        --table-border: rgba(0, 0, 0, 0.128);
+        --table-cell: #F7F7F7;
+        
+        --primary-opacity: #4457651a;
+    }
+
+.input-custom {
+    border: 1px solid  !important;
+}
+.table-custom th {
+    background-color: var(--primary-main) !important;
+    color: var(--primary-contrastText) !important;
+}
+
+.navbar-custom {
+  background-color: var(--primary-main) !important;
+  
+}
+.navbar-custom-header{
+    background-color: var(--secondary-main) !important;
+    color:var(--secondary-contrastText);
+}
+.navbar-custom .navbar-brand,
+.navbar-custom .nav-link {
+  color: var(--primary-contrastText) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-main) !important;
+    border-color: var(--primary-main);
+    color: var(--primary-contrastText) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-light) !important;
+    border-color: var(--primary-light) !important; 
+}
+
+.btn-secondary {
+    background-color: var(--secondary-main) !important;
+    border-color: var(--secondary-main) !important;
+    color: var(--secondary-contrastText) !important;
+    
+}
+
+.btn-secondary:hover {
+    border-color: var(--secondary-light) !important;
+    background-color: var(--secondary-light) !important;  
+}
+
+.btn-warning{
+    background-color: var(--warning-main) !important;
+    color: var(--warning-contrastText) !important;
+}
+.btn-warning:hover{
+    background-color: var(--warning-light)!important;
+}
+.btn-danger{
+    background-color: var(--error-dark) !important;
+    color: var(--error-contrastText) !important;
+}
+.btn-danger:hover{
+    background-color: var(--error-light) !important;
+    border-color: var(--error-light) !important;
+    color: var(--error-contrastText) !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-main);
+    border-color: var(--primary-main);
+    color: var(--primary-contrastText);
+}
+.pagination .page-item.active .page-link:hover {
+    background-color: var(--primary-light);
+    border-color: var(--primary-light);
+    color: var(--primary-contrastText);
+}
+.page-item:not(.active) .page-link {
+    background-color: var(--background-default) !important; 
+    color: #000 !important;               
+    border-color:var(--primary-main) !important;
+}
+.page-item:not(.active) .page-link:hover {
+    background-color: var(--primary-light) !important; 
+    color: var(--primary-contrastText)!important;               
+    border-color:var(--primary-light) !important;
+}

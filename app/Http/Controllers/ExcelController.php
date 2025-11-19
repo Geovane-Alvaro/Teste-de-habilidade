@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Imports\FazendasImport;
+
 
 class ExcelController extends Controller
 {
@@ -26,6 +27,7 @@ class ExcelController extends Controller
 
 
    public function downloadModelo(){
+
     $arquivoExcel = 'uploads/Modelo_Dados.xlsx';
 
     if (!Storage::disk('public')->exists($arquivoExcel)) {
@@ -35,5 +37,5 @@ class ExcelController extends Controller
     $caminho = Storage::disk('public')->path($arquivoExcel);
 
     return response()->download($caminho);
-}
+  }
 }

@@ -4,7 +4,7 @@
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card shadow-sm">
-            <div class="card-header bg-success text-white">
+            <div class="card-header bg-success text-white navbar-custom-header">
                 <h5 class="mb-0">Upload de Arquivo KMZ</h5>
             </div>
 
@@ -36,7 +36,7 @@
                         <input type="file" name="arquivo_kmz" id="arquivo_kmz" class="form-control" accept=".kmz" required>
                     </div>
 
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" class="btn btn-success btn-primary">
                         <i class="bi bi-upload"></i> Enviar Arquivo
                     </button>
                 </form>
@@ -45,7 +45,7 @@
                 @if (Storage::disk('public')->exists('uploads/arquivo.kmz'))
                     <hr>
                     <p>Um arquivo KMZ já foi enviado anteriormente.</p>
-                    <a href="{{ asset('storage/uploads/arquivo.kmz') }}" class="btn btn-primary" download>
+                    <a href="{{ asset('storage/uploads/arquivo.kmz') }}" class="btn btn-secondary" download>
                         <i class="bi bi-download"></i> Baixar KMZ Atual
                     </a>
                 @endif

@@ -10,15 +10,44 @@ class RotafazendaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $fazendas = Rotafazenda::paginate(15);
+    public function index(Request $request)
+{
+    $query = Rotafazenda::query();
 
-        $mensagemSucesso = session('mensagem.sucesso');
-
-        return view('rotafazenda.index')->with('fazendas', $fazendas)->with('mensagemSucesso', $mensagemSucesso);
-        
+    // 🔎 Busca geral
+    if ($request->filled('barraDeBusca')) {
+        $search = mb_strtoupper($request->barraDeBusca);
+        $query->where(function($q) use ($search) {
+            $q->where('fazenda', 'like', "%{$search}%")
+              ->orWhere('setor', 'like', "%{$search}%")
+              ->orWhere('talhao', 'like', "%{$search}%");
+        });
     }
+
+    // 🧩 Filtros avançados
+    if ($request->filled('setor')) {
+        $query->where('setor', 'like', "%{$request->setor}%");
+    }
+
+    if ($request->filled('variedade')) {
+        $query->where('variedade', 'like', "%{$request->variedade}%");
+    }
+
+    if ($request->filled('insumo')) {
+        $query->where('insumo', $request->insumo);
+    }
+
+    if ($request->filled('dataPlantio')) {
+        $query->whereDate('dataPlantio', $request->dataPlantio);
+    }
+
+    // 🔁 Paginação preservando filtros
+    $fazendas = $query->paginate(15)->withQueryString();
+
+    $mensagemSucesso = session('mensagem.sucesso');
+
+    return view('rotafazenda.index', compact('fazendas', 'mensagemSucesso'));
+}
     
     /**
      * Show the form for creating a new resource.

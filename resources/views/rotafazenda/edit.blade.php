@@ -53,7 +53,7 @@
             <input type="date" name="dataPlantio" value="{{ $fazenda->dataPlantio }}" class="form-control">
         </div>
 
-        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-        <a href="{{ route('rotafazenda.index') }}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary" name="botaoSalvar"> Editar</button>
+        <a href="{{ route('rotafazenda.index') }}" name="botaoCancelar" class="btn btn-secondary">Cancelar</a>
     </form>
 @endsection

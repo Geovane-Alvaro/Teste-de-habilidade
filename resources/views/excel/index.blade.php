@@ -14,7 +14,7 @@
         </div>
     @endif
 
-    <a href="{{ route('excel.download') }}" class="btn btn-success mb-3">
+    <a href="{{ route('excel.download') }}" class="btn btn-secondary mb-3">
     Baixar modelo Excel
     </a>
 
