@@ -14,6 +14,12 @@
         </div>
     @endif
 
+    @if (session('mensagem.erro'))
+        <div class="alert alert-danger">
+            {{ session('mensagem.erro') }}
+        </div>
+    @endif
+
     <a href="{{ route('excel.download') }}" class="btn btn-secondary mb-3">
     Baixar modelo Excel
     </a>

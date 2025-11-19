@@ -14,29 +14,6 @@ class FazendasImport implements ToModel, WithHeadingRow, WithValidation
 
 
     use Importable;
-
-      protected $requiredColumns = [
-        'setor',
-        'fazenda',
-        'talhao',
-        'variedade',
-        'corte',
-        'area',
-        'insumo',
-        'dataplantio'
-    ];
-
-       public function prepareForValidation($row, $index)
-    {
-         
-        foreach ($this->requiredColumns as $col) {
-            if (!array_key_exists($col, $row)) {
-                throw new \Exception("A coluna obrigatória '{$col}' não foi encontrada na planilha.");
-            }
-        }
-
-        return $row;
-    }
     
     public function model(array $row){
         

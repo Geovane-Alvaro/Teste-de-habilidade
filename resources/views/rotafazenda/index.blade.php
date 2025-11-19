@@ -44,12 +44,12 @@
 
             <div class="col-md-3">
                 <label class="form-label">Setor</label>
-                <input type="text" name="setor" class="form-control input-custom" value="{{ request('setor') }}">
+                <input type="text" name="setor" class="form-control input-custom" placeholder="Buscar por setor" value="{{ request('setor') }}">
             </div>
 
             <div class="col-md-3">
                 <label class="form-label">Variedade</label>
-                <input type="text" name="variedade" class="form-control input-custom" value="{{ request('variedade') }}">
+                <input type="text" name="variedade" class="form-control input-custom" placeholder="Buscar por variedade" value="{{ request('variedade') }}">
             </div>
 
             <div class="col-md-3">

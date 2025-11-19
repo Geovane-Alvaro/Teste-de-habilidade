@@ -14,7 +14,7 @@ class RotafazendaController extends Controller
 {
     $query = Rotafazenda::query();
 
-    // 🔎 Busca geral
+    
     if ($request->filled('barraDeBusca')) {
         $search = mb_strtoupper($request->barraDeBusca);
         $query->where(function($q) use ($search) {
@@ -24,7 +24,7 @@ class RotafazendaController extends Controller
         });
     }
 
-    // 🧩 Filtros avançados
+   
     if ($request->filled('setor')) {
         $query->where('setor', 'like', "%{$request->setor}%");
     }
@@ -41,7 +41,7 @@ class RotafazendaController extends Controller
         $query->whereDate('dataPlantio', $request->dataPlantio);
     }
 
-    // 🔁 Paginação preservando filtros
+    
     $fazendas = $query->paginate(15)->withQueryString();
 
     $mensagemSucesso = session('mensagem.sucesso');

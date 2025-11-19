@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
-use PhpOffice\PhpSpreadsheet\Shared\Date;
 use App\Imports\FazendasImport;
-use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 
 class ExcelController extends Controller
@@ -17,23 +16,56 @@ class ExcelController extends Controller
     }
 
 
-    public function store(Request $request){
+    public function store(Request $request)
+{
+    $request->validate([
+        'arquivo_excel' => 'required|mimes:xlsx,xlsm'
+    ]);
 
-        $request->validate(['arquivo_excel' => 'required|mimes:xlsx,xlsm']);
+    $file = $request->file('arquivo_excel');
 
-        Excel::import(new FazendasImport, $request->file('arquivo_excel'));
+    
+    $spreadsheet = IOFactory::load($file->getPathname());
+    $sheet = $spreadsheet->getActiveSheet();
 
-        return to_route('rotafazenda.index')->with('mensagem.sucesso', 'Excel importado com sucesso!');
+   
+    $header = $sheet->rangeToArray('A1:' . $sheet->getHighestColumn() . '1')[0];
+
+    
+    $received = array_map(fn($h) => strtolower(trim($h)), $header);
+
+    
+    $expected = [
+        'setor',
+        'fazenda',
+        'talhao',
+        'variedade',
+        'corte',
+        'area',
+        'insumo',
+        'dataplantio'
+    ];
+
+    
+    foreach ($expected as $col) {
+        if (!in_array($col, $received)) {
+            return back()->with('mensagem.erro', 
+                "Erro no Excel: a coluna obrigatória '{$col}' está faltando."
+            );
+        }
     }
+
+    Excel::import(new FazendasImport, $file);
+
+    return to_route('rotafazenda.index')
+        ->with('mensagem.sucesso', 'Excel importado com sucesso!');
+}
 
 
    public function downloadModelo(){
-<<<<<<< HEAD
 
-    $arquivoExcel = 'uploads/Modelo_Dados.xlsx';
-=======
+
     $arquivoExcel = 'uploads\Modelo_Dados.xlsx';
->>>>>>> f9b98ff6b44b7249c5cc3743d524061b50880abc
 
     if (!Storage::disk('public')->exists($arquivoExcel)) {
         abort(404, 'Arquivo modelo não encontrado.');

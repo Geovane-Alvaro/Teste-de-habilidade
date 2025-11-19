@@ -32,9 +32,9 @@
                 <p class="small text-muted">
                     {!! __('Mostrando') !!}
                     <span class="fw-semibold">{{ $paginator->firstItem() }}</span>
-                    {!! __('de') !!}
+                    {!! __('até ') !!}
                     <span class="fw-semibold">{{ $paginator->lastItem() }}</span>
-                    {!! __('até') !!}
+                    {!! __('de') !!}
                     <span class="fw-semibold">{{ $paginator->total() }}</span>
                     {!! __('resultados') !!}
                 </p>
