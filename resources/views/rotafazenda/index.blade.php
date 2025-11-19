@@ -114,6 +114,7 @@
                         <form action="{{ route('rotafazenda.destroy', $f->idFazenda) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
+                            <input type="hidden" name="page" value="{{ request('page') }}">
                             <button class="btn btn-danger btn-sm" name="botaoExcluir" onclick="return confirm('Tem certeza que deseja excluir este registro?')"><i 	class=" bi bi-trash	"></i></button>
                         </form>
                     </td>
@@ -125,9 +126,9 @@
             @endforelse
         </tbody>
     </table>
-    <div class="mt-3 ">
-    {{ $fazendas->links('pagination::bootstrap-5') }}
-    </div>
+        <div class="mt-3 ">
+        {{ $fazendas->links('pagination::bootstrap-5') }}
+        </div>
 
     <script>
     document.getElementById('toggleFilters').addEventListener('click', () => {

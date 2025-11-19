@@ -50,7 +50,7 @@ class ExcelController extends Controller
     foreach ($expected as $col) {
         if (!in_array($col, $received)) {
             return back()->with('mensagem.erro', 
-                "Erro no Excel: a coluna obrigatória '{$col}' está faltando."
+                "Erro no Excel: a coluna obrigatória '{$col}' está faltando. Baixe o modelo e tente novamente."
             );
         }
     }
@@ -62,17 +62,13 @@ class ExcelController extends Controller
 }
 
 
-   public function downloadModelo(){
+   public function download(){
 
 
-    $arquivoExcel = 'uploads\Modelo_Dados.xlsx';
+    $arquivo = 'uploads/Modelo_Dados.xlsx';
 
-    if (!Storage::disk('public')->exists($arquivoExcel)) {
-        abort(404, 'Arquivo modelo não encontrado.');
-    }
-
-    $caminho = Storage::disk('public')->path($arquivoExcel);
-
-    return response()->download($caminho);
+    abort_unless(Storage::disk('public')->exists($arquivo), 404, 'Arquivo modelo não encontrado');
+    
+    return Storage::disk('public')->download($arquivo, 'Modelo_Dados.xlsx');
   }
 }

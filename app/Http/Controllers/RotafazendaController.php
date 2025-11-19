@@ -97,10 +97,12 @@ class RotafazendaController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Rotafazenda $rotafazenda)
+    public function destroy(Request $request, Rotafazenda $rotafazenda)
     {
          $rotafazenda->delete();
+        $paginaAtual = $request->input('page', 1);
 
-        return to_route('rotafazenda.index')->with('mensagem.sucesso', "Fazenda '{$rotafazenda->fazenda}' deletada com sucesso!");
+        return to_route('rotafazenda.index', ['page' => $paginaAtual])
+        ->with('mensagem.sucesso', "Fazenda '{$rotafazenda->fazenda}' deletada com sucesso!");
     }
 }

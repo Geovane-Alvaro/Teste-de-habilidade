@@ -37,7 +37,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-success btn-primary">
-                        <i class="bi bi-upload"></i> Enviar Arquivo
+                    Enviar Arquivo
                     </button>
                 </form>
 
@@ -46,7 +46,7 @@
                     <hr>
                     <p>Um arquivo KMZ já foi enviado anteriormente.</p>
                     <a href="{{ route('kmz.download') }}" class="btn btn-secondary" download>
-                        <i class="bi bi-download"></i> Baixar KMZ Atual
+                     Baixar KMZ Atual
                     </a>
                 @endif
 
