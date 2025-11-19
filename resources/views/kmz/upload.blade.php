@@ -41,11 +41,11 @@
                     </button>
                 </form>
 
-                {{-- Se já houver um arquivo salvo, mostra opção pra baixar --}}
+                
                 @if (Storage::disk('public')->exists('uploads/arquivo.kmz'))
                     <hr>
                     <p>Um arquivo KMZ já foi enviado anteriormente.</p>
-                    <a href="{{ asset('storage/uploads/arquivo.kmz') }}" class="btn btn-secondary" download>
+                    <a href="{{ route('kmz.download') }}" class="btn btn-secondary" download>
                         <i class="bi bi-download"></i> Baixar KMZ Atual
                     </a>
                 @endif

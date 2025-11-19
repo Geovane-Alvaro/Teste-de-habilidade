@@ -18,7 +18,7 @@ class KmzController extends Controller
             'arquivo_kmz' => 'required|file|mimes:kmz,zip|max:10240',
         ]);
 
-        //apagar arquivo antigo se existir
+        
         if (Storage::disk('public')->exists('uploads/arquivo.kmz')) {
             Storage::disk('public')->delete('uploads/arquivo.kmz');
         }
@@ -31,5 +31,11 @@ class KmzController extends Controller
 
         return to_route('kmz.index')
             ->with('mensagem.sucesso', "Arquivo '$nomeOriginal' KMZ enviado com sucesso!");
+    }
+    public function dowload(){
+        $arquivo = 'uploads/arquivo.kmz';
+        abort_unless(Storage::disk('public')->exists($arquivo), 404, 'Arquivo não encontrado.');
+
+        return Storage::disk('public')->download($arquivo);
     }
 }

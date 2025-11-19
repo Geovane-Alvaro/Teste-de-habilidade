@@ -12,7 +12,7 @@ Route::get('/', [RotafazendaController::class, 'index']);
 Route::resource('rotafazenda', RotafazendaController::class);
 
 Route::resource('kmz', KmzController::class)->only(['index', 'store']);
+Route::get('/kmz/download', [KmzController::class, 'dowload'])->name('kmz.download');
 
 Route::resource('excel', ExcelController::class)->only(['index', 'store']);
-
 Route::get('excel/download', [ExcelController::class, 'downloadModelo'])->name('excel.download');
