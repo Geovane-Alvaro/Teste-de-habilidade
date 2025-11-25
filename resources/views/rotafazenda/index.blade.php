@@ -11,11 +11,12 @@
     @endif
 
     <div class="text-end mb-2">
+
     <a href="{{ route('kmz.index') }}" name="Botao de envio kmz" class="btn btn-success aling-item-center btn-primary" >
-    <i></i> Enviar KMZ</a>
+     Enviar KMZ</a>
 
     <a href="{{ route('excel.index') }}" class="btn btn-success aling-item-center btn-primary" >
-    <i></i> Enviar excel</a>
+     Enviar excel</a>
 
     </div>
 
@@ -25,6 +26,8 @@
     <div class="d-flex gap-2 mb-3" name="barraDeBuscaEBotaoFiltro">
 
         
+        <a href="{{ route('rotafazenda.create') }}" class="btn btn-sucess aling-item-center btn-primary" >
+        Adicionar</a>
 
         <input name="barraDeBusca" type="text" class="form-control input-custom"placeholder="Pesquisar fazenda, setor ou talhão"
             value="{{ request('barraDeBusca') }}"
@@ -108,7 +111,7 @@
                     <td>{{ $f->area }}</td>
                     <td>{{ $f->insumo == 1? 'Possui': 'Não possui' }}</td>
                     <td>{{ \Carbon\Carbon::parse($f->dataPlantio)->format('d/m/Y') }}</td>
-                    <td>
+                    <td class="text-nowrap">
                         <a href="{{ route('rotafazenda.edit', $f->idFazenda) }}" class="btn btn-warning btn-sm" name="botaoEditar"> <i class="bi bi-pencil"></i></a>
 
                         <form action="{{ route('rotafazenda.destroy', $f->idFazenda) }}" method="POST" style="display:inline;">
