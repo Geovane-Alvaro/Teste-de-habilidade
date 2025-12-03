@@ -10,7 +10,7 @@
         <div class="row mb-3">
             <div class="col">
                 <label class="form-label">Setor</label>
-                <input type="text" name="setor" value="{{ $fazenda->setor }}" class="form-control">
+                <input type="text" id="setor" name="setor" value="{{ $fazenda->setor }}" class="form-control">
             </div>
 
             <div class="col">
@@ -36,32 +36,41 @@
 
             <div class="col">
                 <label class="form-label">Área</label>
-                <input type="text" name="area" value="{{ $fazenda->area }}" class="form-control input-readonly"
-                    readonly>
+                <input type="text" id="area" name="area" value="{{ $fazenda->area }}"
+                    class="form-control input-readonly" readonly>
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col">
                 <label class="form-label">Corte</label>
-                <select name="corte" class="form-select" id="corte">
-                    @foreach ($cortes as $c)
-                        <option value="{{ $c->corte }}" {{ $fazenda->corte == $c->corte ? 'selected' : '' }}>
-                            {{ $c->corte }}1
-                        </option>
-                    @endforeach
-                </select>
+                <div class="input-group">
+                    <select name="corte" class="form-select" id="corte">
+                        @foreach ($cortes as $c)
+                            <option value="{{ $c->corte }}" {{ $fazenda->corte == $c->corte ? 'selected' : '' }}>
+                                {{ $c->corte }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary btn-add" id="addCorte"><a
+                            class="bi bi-plus"></a></button>
+                </div>
             </div>
 
             <div class="col">
                 <label class="form-label">Variedade</label>
-                <select name="variedade" class="form-select" id="variedade">
-                    @foreach ($variedades as $v)
-                        <option value="{{ $v->variedade }}" {{ $fazenda->variedade == $v->variedade ? 'selected' : '' }}>
-                            {{ $v->variedade }}
-                        </option>
-                    @endforeach
-                </select>
+                <div class="input-group">
+                    <select name="variedade" class="form-select" id="variedade">
+                        @foreach ($variedades as $v)
+                            <option value="{{ $v->variedade }}"
+                                {{ $fazenda->variedade == $v->variedade ? 'selected' : '' }}>
+                                {{ $v->variedade }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary btn-add" id="addVariedade"><a
+                            class="bi bi-plus"></a></button>
+                </div>
             </div>
         </div>
 
@@ -82,8 +91,10 @@
             <div id="map-cadastro"></div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Salvar alterações</button>
-        <a href="{{ route('rotafazenda.index') }}" class="btn btn-secondary">Cancelar</a>
+        <div class="mb-4">
+            <button type="submit" class="btn btn-primary">Salvar alterações</button>
+            <a href="{{ route('rotafazenda.index') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
     </form>
 @endsection
 

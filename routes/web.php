@@ -15,8 +15,8 @@ Route::get('/kmz/download', [KmzController::class, 'dowload'])->name('kmz.downlo
 Route::resource('excel', ExcelController::class)->only(['index', 'store']);
 Route::get('excel/download', [ExcelController::class, 'download'])->name('excel.download');
 
-// Route::get('rotafazenda/buscar-setor/{setor}', [RotafazendaController::class, 'buscarPorSetor']);
+Route::get('rotafazenda/setor/{setor}', [RotafazendaController::class, 'buscarPorSetor']);
 Route::get('rotafazenda/buscar/{setor}/{talhao}', [RotafazendaController::class, 'buscarPorTalhao']);
+Route::get('/rotafazenda/mapa/{setor}', [RotafazendaController::class, 'mapaSetor']);
 Route::get('/rotafazenda/mapa/{setor}/{talhao}', [RotafazendaController::class, 'mapa']);
 Route::get('/rotafazenda/shape/{setor}',[RotafazendaController::class, 'shapefile']);
-Route::get('/rotafazenda/opcoes', [RotafazendaController::class, 'listarOpcoes']);

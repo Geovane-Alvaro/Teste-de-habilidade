@@ -51,26 +51,25 @@ class RotafazendaController extends Controller
         return view('rotafazenda.index', compact('fazendas', 'mensagemSucesso'));
     }
 
-   public function update(Request $request, $id)
-{
-    $fazenda = Rotafazenda::findOrFail($id);
+    public function update(Request $request, $id)
+    {
+        $fazenda = Rotafazenda::findOrFail($id);
 
-    $fazenda->setor = $request->setor;
-    $fazenda->fazenda = $request->fazenda;
-    $fazenda->talhao = $request->talhao;
-    $fazenda->area = $request->area;
-    $fazenda->corte = $request->corte;
-    $fazenda->variedade = $request->variedade;
-    $fazenda->insumo = $request->insumo;
-    $fazenda->dataPlantio = $request->dataPlantio;
+        $fazenda->setor = $request->setor;
+        $fazenda->fazenda = $request->fazenda;
+        $fazenda->talhao = $request->talhao;
+        $fazenda->area = $request->area;
+        $fazenda->corte = $request->corte;
+        $fazenda->variedade = $request->variedade;
+        $fazenda->insumo = $request->insumo;
+        $fazenda->dataPlantio = $request->dataPlantio;
 
-    $fazenda->save();
+        $fazenda->save();
 
-    return redirect()
-        ->route('rotafazenda.index')
-        ->with('mensagem.sucesso', 'Fazenda atualizada com sucesso!');
-    
-}
+        return redirect()
+            ->route('rotafazenda.index')
+            ->with('mensagem.sucesso', 'Fazenda atualizada com sucesso!');
+    }
 
 
     /**
@@ -137,59 +136,74 @@ class RotafazendaController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-   public function edit($id)
-{
-    $fazenda = Rotafazenda::findOrFail($id);
+    public function edit($id)
+    {
+        $fazenda = Rotafazenda::findOrFail($id);
 
-    // listas completas para os selects
-    $cortes = Rotafazenda::select('corte')->distinct()->orderBy('corte')->get();
-    $variedades = Rotafazenda::select('variedade')->distinct()->orderBy('variedade')->get();
+        // listas completas para os selects
+        $cortes = Rotafazenda::select('corte')->distinct()->orderBy('corte')->get();
+        $variedades = Rotafazenda::select('variedade')->distinct()->orderBy('variedade')->get();
 
-    // talhões do setor (para preencher o select)
-    $talhoes = Rotafazenda::where('setor', $fazenda->setor)
-        ->select('talhao')
-        ->distinct()
-        ->orderBy('talhao')
-        ->get();
+        // talhões do setor (para preencher o select)
+        $talhoes = Rotafazenda::where('setor', $fazenda->setor)
+            ->select('talhao')
+            ->distinct()
+            ->orderBy('talhao')
+            ->get();
 
-    return view('rotafazenda.edit', compact(
-        'fazenda',
-        'cortes',
-        'variedades',
-        'talhoes'
-    ));
-}
-
-    // public function buscarPorSetor($setor)
-    // {
-    //     $dado = Rotafazenda::where('setor', $setor)->first();
-    //     if (!$dado) { // return response()->json(null); 
-    //     }
-    //     return response()->json([
-    //         'fazenda' => $dado->fazenda
-    //     ]);
-    // }
-
-    public function buscarPorTalhao($setor, $talhao)
-{
-    $query = Rotafazenda::where('setor', $setor);
-
-    if ($talhao !== "0" && $talhao !== "null" && $talhao !== "") {
-        $query->where('talhao', $talhao);
+        return view('rotafazenda.edit', compact(
+            'fazenda',
+            'cortes',
+            'variedades',
+            'talhoes'
+        ));
     }
 
-    $dado = $query->first();
-    if (!$dado) return response()->json(null);
+    public function buscarPorSetor($setor)
+    {
+        $talhoes = Rotafazenda::where('setor', $setor)
+            ->select('talhao')
+            ->distinct()
+            ->orderBy('talhao')
+            ->get();
 
-    return response()->json([
-        'fazenda' => $dado->fazenda,
-        'variedade' => $dado->variedade,
-        'corte' => $dado->corte,
-        'area' => $dado->area,
-        'insumo' => $dado->insumo,
-        'dataPlantio' => $dado->dataPlantio,
-    ]);
-}
+        return response()->json($talhoes);
+    }
+
+    public function buscarPorTalhao($setor, $talhao)
+    {
+        $query = Rotafazenda::where('setor', $setor);
+
+        if ($talhao !== "0" && $talhao !== "null" && $talhao !== "") {
+            $query->where('talhao', $talhao);
+        }
+
+        $dado = $query->first();
+        if (!$dado) return response()->json(null);
+
+        return response()->json([
+            'fazenda' => $dado->fazenda,
+            'variedade' => $dado->variedade,
+            'corte' => $dado->corte,
+            'area' => $dado->area,
+            'insumo' => $dado->insumo,
+            'dataPlantio' => $dado->dataPlantio,
+        ]);
+    }
+
+    public function destroy(Request $request, Rotafazenda $rotafazenda)
+    {
+        $rotafazenda->delete();
+        $paginaAtual = $request->input('page', 1);
+
+        return to_route('rotafazenda.index', ['page' => $paginaAtual])
+            ->with('mensagem.sucesso', "Fazenda '{$rotafazenda->fazenda}' deletada com sucesso!");
+    }
+
+    public function mapaSetor($setor){
+
+    }
+    
     public function mapa($setor, $talhao)
     {
         $path = public_path('storage/uploads/doc.kml');
@@ -245,15 +259,17 @@ class RotafazendaController extends Controller
 
     function shapefile($setor)
     {
+        //inicia as veriaveis
         //$setor = $request->setor;
         $fazendaArray = [];
         $coordinatesArray = [];
         $cont = 1;
         $talhao = '';
 
+        //localiza o arquivo 
         $filePath = public_path('uploads/doc.kml');
 
-        // Verifica se o arquivo existe
+        // Verifica se o arquivo existe, se nao existir retorna um json
         if (!file_exists($filePath)) {
             return response()->json([
                 'erro' => true,
@@ -262,53 +278,76 @@ class RotafazendaController extends Controller
             ]);
         }
 
-        // Leia o conteúdo do arquivo
+        // Le o conteúdo do arquivo como string
         $content = file_get_contents($filePath);
 
-        // Certifique-se de que o conteúdo está em UTF-8
+        // Certifique-se de que o conteúdo está em UTF-8, converte para utf-8
         $content = mb_convert_encoding($content, 'UTF-8', 'auto');
 
+        ///<td>FAZENDA<\/td>\s* procura literalmente td fazenda. S* ignora qualquer espaço 
+        //<td>' . $setor . '<\/td> é o valor que informou na função e o que sera buscado
+        //td (.*?)placemark, pega tudo ate o fechamento da tag placemark 
         $pattern = '/<td>FAZENDA<\/td>\s*<td>' . $setor . '<\/td>(.*?)<\/Placemark>/s';
         Log::info("Padrão Regex: " . $pattern);
+
+        //laço de reptição que vai o pattern que é o bloco encontrado, o content que é o arquivo convertido em utf-8
+        //matches que define o que sera capturado, matches[1] tudo que esta entre o setor e o placemark
+        //matches[0] bloco inteiro do placemark
+        //preg_match procura a primeria ocorrencia o pardrao em content
         while (preg_match($pattern, $content, $matches)) {
             $intervalContent = $matches[1]; // Conteúdo dentro do intervalo
 
             // Define o padrão para capturar os valores das tags <td>
+            //captura o conteudo entre cada par <td>...</td>
             $tdPattern = '/<td>(.*?)<\/td>/s';
 
             // Busca todos os valores das tags <td>
+            //pega todas as ocorrencias tdmatches[1],somente o conteudo sem as tags
             preg_match_all($tdPattern, $intervalContent, $tdMatches);
 
             // Transforma o array plano em um array associativo (chave-valor)
+            //Esse é um array sequencial com os textos capturados, o codigo transformara em chave valor
             $tdArray = $tdMatches[1];
             $structuredData = [];
 
+            //Percorre o arrey como a estrutura é chave valor entao ele vai pulando de 2 em 2 
             for ($i = 0; $i < count($tdArray); $i += 2) {
-
                 if (isset($tdArray[$i + 1])) {
                     $structuredData[$tdArray[$i]] = $tdArray[$i + 1];
                 }
             }
-            Log::info($structuredData);
+             Log::info($structuredData);
             // Log::info(isset($structuredData['NOME'], $structuredData['TALHAO'], $structuredData['AREA']));
             // Log::info($structuredData['NOME'], $structuredData['TALHAO'], $structuredData['AREA']);
+
+
+            //verifica se nome, talhao e area foi encontrado no bloco 
             if (isset($structuredData['NOME'], $structuredData['TALHAO'], $structuredData['AREA'])) {
                 $parts = explode("-", $structuredData['NOME']);
                 $descricaoFazenda = trim($parts[1]);
+                //guarda talaho e area
                 $talhao = $structuredData['TALHAO'];
                 $area = $structuredData['AREA'];
-                Log::info("Processando Fazenda: " . $structuredData['NOME'] . ", Talhão: " . $talhao . ", Área: " . $area);
+
+                // Log::info("Processando Fazenda: " . $structuredData['NOME'] . ", Talhão: " . $talhao . ", Área: " . $area);
+                
+                
                 // Verifica se essa combinação já existe
+                //cria uma chave composta com nome mais o talhao e a area, para identificar fazenda e o talhao
                 $key = $structuredData['NOME'] . $structuredData['TALHAO'] . $structuredData['AREA'];
                 if (!isset($uniqueFazendas[$key])) {
                     $uniqueFazendas[$key] = true; // Marca como existente
 
+                    //db::select retorna um array, fazendo que $fazendaArray seja um array de arrays
                     $fazendaArray[] = DB::select('SELECT * FROM rotaFazenda WHERE setor = ? AND talhao IN (' . $talhao . ')', [$setor]);
                     // Log::info("Adicionando Fazenda ao Array: " . print_r($fazendaArray, true));
                 }
 
                 // Processa as coordenadas para este intervalo
+                //procura as tags dentro do mesmo bloco
                 $patternCoordenadas = '/<coordinates>(.*?)<\/coordinates>/s';
+
+                //capta todos os blocos de coordenadas 
                 preg_match_all($patternCoordenadas, $intervalContent, $coordMatches);
 
                 if (!empty($coordMatches[1])) {
@@ -344,12 +383,13 @@ class RotafazendaController extends Controller
             $content = str_replace($matches[0], '', $content);
         }
 
-
+        //se nenhuma coordenada foi adicionada ao array, retorna um json de erro
         if (empty($coordinatesArray)) {
             return response()->json(['erro' => true, 'mensagem' => 'Nenhum dado encontrado para o setor.']);
         }
+        //array_column extrai todos os valores de talhao
+        //array_unique remove dados duplicados 
         $listaTalhoes = array_unique(array_column($coordinatesArray, 'talhao'));
-
         return response()->json([
             'erro' => false,
             'talhoes' => $listaTalhoes,

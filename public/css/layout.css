@@ -168,3 +168,10 @@ body {
     border-radius: 8px;
     margin-top: 10px;
 }
+.btn-add{
+    border-color: #e0e0e0;
+}
+.btn-add:hover{
+    background-color: var(--secondary-light);
+    border-color: #e0e0e0;
+}

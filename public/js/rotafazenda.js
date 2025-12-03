@@ -6,12 +6,16 @@ function initMap() {
 
     map = L.map("map-cadastro").setView([defaultLat, defaultLng], 15);
 
-    const tileLayerClaro = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    const tileLayerClaro = L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
             attribution: "© OpenStreetMap contributors",
         }
     );
 
-    const tileLayerEscuro = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{
+    const tileLayerEscuro = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        {
             attribution: "",
             opacity: 0.5,
         }
@@ -28,66 +32,109 @@ function initMap() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    const setorInput = document.querySelector('input[name="setor"]');
+    const talhaoSelect = document.getElementById("talhao");
+    const fazendaInput = document.querySelector('input[name="fazenda"]');
+    const areaInput = document.querySelector('input[name="area"]');
+
+    let coordinatesData = []; // armazena os dados do shapefile
+
     initMap();
-});
 
-document.querySelector('input[name="setor"]').addEventListener("blur", function () {
-
-        const setor = this.value;
-
+    // Quando o usuário digitar o setor
+    setorInput.addEventListener("blur", function () {
+        const setor = setorInput.value.trim();
         if (!setor) return;
 
         fetch(`/rotafazenda/shape/${setor}`)
-            .then((response) => response.json())
+            .then((res) => res.json())
             .then((data) => {
                 if (
                     data.erro ||
-                    !data.fazendaArray ||
-                    data.fazendaArray.length === 0
-                ) {
+                    !data.coordinatesArray ||
+                    data.coordinatesArray.length === 0
+                )
                     return;
-                }
 
-                //criar lista de talhoes
-                let talhoes = data.talhoes;
+                coordinatesData = data.coordinatesArray;
 
-                if (!talhoes) {
-                    console.warn("Nenhum talhão encontrado");
-                    return;
-                }
-
-                // transforma objeto em array
-                talhoes = Object.values(talhoes);
-
-                // cria select
-                const talhaoSelect = document.getElementById("talhao");
+                // Atualiza select de talhões
+                const talhoes = [
+                    ...new Set(coordinatesData.map((r) => r.talhao)),
+                ];
                 talhaoSelect.innerHTML =
                     '<option value="">Selecione o talhão</option>';
-
-                talhoes.forEach((talhao) => {
+                talhoes.forEach((t) => {
                     const option = document.createElement("option");
-                    option.value = talhao;
-                    option.textContent = talhao;
+                    option.value = t;
+                    option.textContent = t;
                     talhaoSelect.appendChild(option);
                 });
-                // pega o primeiro registro do banco:
-                const fazenda = data.fazendaArray[0][0];
 
-                if (!fazenda) {
-                    console.warn("Formato inesperado em fazendaArray");
-                    return;
+                // Preenche fazenda com o primeiro registro do setor
+                const primeiroRegistro = coordinatesData[0];
+                if (primeiroRegistro) {
+                    fazendaInput.value =
+                        primeiroRegistro.descricaoFazenda ?? "";
                 }
 
-                document.querySelector('input[name="fazenda"]').value =
-                    fazenda.fazenda ?? "";
-                document.querySelector('input[name="variedade"]').value =
-                    fazenda.variedade ?? "";
-                document.querySelector('input[name="corte"]').value =
-                    fazenda.corte ?? "";
-                document.querySelector('input[name="area"]').value =
-                    fazenda.area ?? "";
-            });
+                // Limpa área (será preenchida quando escolher talhão)
+                areaInput.value = "";
+            })
+            .catch((err) =>
+                console.error("Erro ao carregar dados do KML:", err)
+            );
     });
+    // Quando o usuário escolher um talhão
+    talhaoSelect.addEventListener("change", function () {
+        const talhaoSelecionado = talhaoSelect.value;
+        if (!talhaoSelecionado) {
+            areaInput.value = "";
+            return;
+        }
+
+        // Busca no array de coordenadas a área do talhão escolhido
+        const registro = coordinatesData.find(
+            (r) => r.talhao === talhaoSelecionado
+        );
+        if (registro) {
+            const areaNumber = parseFloat(registro.area.replace(",", "."));
+            areaInput.value = areaNumber.toFixed(2);
+        } else {
+            areaInput.value = "";
+        }
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Adicionar novo Corte ao select
+    document.getElementById("addCorte").addEventListener("click", function () {
+        let novoCorte = prompt("Digite o novo corte:");
+        if (novoCorte) {
+            novoCorte = novoCorte.toUpperCase(); // força letras maiúsculas
+            const corteSelect = document.getElementById("corte");
+            const option = document.createElement("option");
+            option.value = novoCorte;
+            option.textContent = novoCorte;
+            option.selected = true; //  deixa a opção nova opção já selecionada
+            corteSelect.appendChild(option);
+        }
+    });
+
+    // Adicionar nova Variedade ao select
+    document.getElementById("addVariedade").addEventListener("click", function () {
+            let novaVariedade = prompt("Digite a nova variedade:");
+            if (novaVariedade) {
+                novaVariedade = novaVariedade.toUpperCase(); // força letras maiúsculas
+                const variedadeSelect = document.getElementById("variedade");
+                const option = document.createElement("option");
+                option.value = novaVariedade;
+                option.textContent = novaVariedade;
+                option.selected = true; //  deixa a opção nova opção já selecionada
+                variedadeSelect.appendChild(option);
+            }
+        });
+});
 
 // document.querySelector('input[name="setor"]').addEventListener('blur', function() {
 //     const talhao = this.value;
@@ -110,7 +157,7 @@ document.querySelector('input[name="setor"]').addEventListener("blur", function 
 //         });
 // });
 
-// document.querySelector('input[name="talhao"]').addEventListener('blur', function () {
+// document.querySelector('select[name="talhao"]').addEventListener('blur', function () {
 
 //     const setor = document.querySelector('input[name="setor"]').value;
 //     const talhao = this.value;
@@ -128,25 +175,3 @@ document.querySelector('input[name="setor"]').addEventListener("blur", function 
 //             desenharTalhoes(data, map);
 //         });
 //     });
-document.addEventListener("DOMContentLoaded", function () {
-
-    fetch("/rotafazenda/opcoes")
-        .then(response => response.json())
-        .then(data => {
-
-            // VARIEDADES
-            const selVar = document.getElementById("variedade");
-            selVar.innerHTML = '<option value="">Selecione</option>';
-            data.variedades.forEach(v => {
-                selVar.innerHTML += `<option value="${v}">${v}</option>`;
-            });
-
-            // CORTES
-            const selCorte = document.getElementById("corte");
-            selCorte.innerHTML = '<option value="">Selecione</option>';
-            data.cortes.forEach(c => {
-                selCorte.innerHTML += `<option value="${c}">${c}</option>`;
-            });
-
-        });
-});
