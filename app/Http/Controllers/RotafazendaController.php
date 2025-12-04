@@ -317,6 +317,7 @@ class RotafazendaController extends Controller
                 }
             }
              Log::info($structuredData);
+               
             // Log::info(isset($structuredData['NOME'], $structuredData['TALHAO'], $structuredData['AREA']));
             // Log::info($structuredData['NOME'], $structuredData['TALHAO'], $structuredData['AREA']);
 
@@ -346,7 +347,7 @@ class RotafazendaController extends Controller
                 // Processa as coordenadas para este intervalo
                 //procura as tags dentro do mesmo bloco
                 $patternCoordenadas = '/<coordinates>(.*?)<\/coordinates>/s';
-
+                
                 //capta todos os blocos de coordenadas 
                 preg_match_all($patternCoordenadas, $intervalContent, $coordMatches);
 
@@ -354,7 +355,6 @@ class RotafazendaController extends Controller
                     foreach ($coordMatches[1] as $coordMatch) {
                         // Remove espaços em excesso e divide os pares de coordenadas
                         $coordinatesPairs = explode(' ', trim($coordMatch));
-
                         foreach ($coordinatesPairs as $pair) {
                             // Divide longitude, latitude e altitude
                             $coordParts = explode(',', $pair);
@@ -372,7 +372,7 @@ class RotafazendaController extends Controller
                                     'latitude' => (float)$latitude,
                                     'longitude' => (float)$longitude,
                                     'altitude' => (float)$altitude,
-                                ];
+                                ];  
                             }
                         }
                     }
@@ -387,6 +387,7 @@ class RotafazendaController extends Controller
         if (empty($coordinatesArray)) {
             return response()->json(['erro' => true, 'mensagem' => 'Nenhum dado encontrado para o setor.']);
         }
+        
         //array_column extrai todos os valores de talhao
         //array_unique remove dados duplicados 
         $listaTalhoes = array_unique(array_column($coordinatesArray, 'talhao'));
@@ -394,7 +395,7 @@ class RotafazendaController extends Controller
             'erro' => false,
             'talhoes' => $listaTalhoes,
             'fazendaArray' => $fazendaArray,
-            'coordinatesArray' => $coordinatesArray,
+            'coordinatesArray' => $coordinatesArray,           
         ]);
     }
 }

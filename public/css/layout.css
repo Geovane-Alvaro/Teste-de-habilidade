@@ -175,3 +175,11 @@ body {
     background-color: var(--secondary-light);
     border-color: #e0e0e0;
 }
+.talhao-label {
+    color: orange;
+    text-align: center;
+    line-height: 30px;
+    width: 30px;
+    height: 30px;
+    font-weight: bold;
+}

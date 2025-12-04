@@ -17,6 +17,5 @@ Route::get('excel/download', [ExcelController::class, 'download'])->name('excel.
 
 Route::get('rotafazenda/setor/{setor}', [RotafazendaController::class, 'buscarPorSetor']);
 Route::get('rotafazenda/buscar/{setor}/{talhao}', [RotafazendaController::class, 'buscarPorTalhao']);
-Route::get('/rotafazenda/mapa/{setor}', [RotafazendaController::class, 'mapaSetor']);
 Route::get('/rotafazenda/mapa/{setor}/{talhao}', [RotafazendaController::class, 'mapa']);
 Route::get('/rotafazenda/shape/{setor}',[RotafazendaController::class, 'shapefile']);
