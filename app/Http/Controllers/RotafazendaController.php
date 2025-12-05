@@ -396,7 +396,7 @@ class RotafazendaController extends Controller
             'talhoes' => $listaTalhoes,
             'fazendaArray' => $fazendaArray,
             'coordinatesArray' => $coordinatesArray, 
-            Log::info($coordinatesArray),   
+            // Log::info($coordinatesArray),   
         ]);
     }
 }
