@@ -1,9 +1,9 @@
-// ===================== MAPA E VARIÁVEIS GLOBAIS =====================
+// variaveis globais
 let map = null; // instância principal do Leaflet
 let talhoesLayerGroup = L.layerGroup(); // grupo onde ficam todos os polígonos e labels
 let destaqueLayer = null; // camada usada para destacar apenas 1 talhão
 
-// ===================== INICIALIZAR O MAPA =====================
+// funcao de iniciar o mapa
 function initMap() {
     map = L.map("map-cadastro").setView([-21.9269, -46.9247], 15); // cria o mapa e centraliza
 
@@ -28,7 +28,7 @@ function initMap() {
     talhoesLayerGroup.addTo(map); // adiciona o grupo de camadas ao mapa
 }
 
-// ===================== NORMALIZAR COORDENADAS =====================
+//  funcao para normalizar as coordenadas
 // Garante que cada coordenada fique no formato correto [lat, lng]
 function normalizePoint(lat, lng) {
     lat = typeof lat === "string" ? parseFloat(lat.replace(",", ".")) : lat; // converte string → número
@@ -42,11 +42,10 @@ function normalizePoint(lat, lng) {
         lat = lng;
         lng = tmp;
     }
-
     return [lat, lng];
 }
 
-// ===================== DESENHAR TODOS OS TALHÕES =====================
+// funcao para desenhar todos os talhoes
 function desenharTalhoes(lista) {
     talhoesLayerGroup.clearLayers(); // limpa polígonos antigos
 
@@ -114,7 +113,7 @@ function desenharTalhoes(lista) {
     }
 }
 
-// ===================== DESTACAR TALHÃO SELECIONADO =====================
+// funcao para destacar o talhao que foi selecionado
 function destacarTalhao(item) {
     if (destaqueLayer) {
         // remove destaque anterior
@@ -151,7 +150,7 @@ function destacarTalhao(item) {
     });
 }
 
-// ===================== CÓDIGO PRINCIPAL AO CARREGAR A PÁGINA =====================
+// funcao main do create ao carregar a pagina
 document.addEventListener("DOMContentLoaded", function () {
     const setorInput = document.querySelector('input[name="setor"]'); // campo do setor
     const talhaoSelect = document.getElementById("talhao"); // select de talhão
@@ -162,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let coordinatesData = []; // lista final com talhões agrupados
 
-    // ======== QUANDO DIGITAR O SETOR, BUSCAR SHAPEFILE ========
+    //  quando digitar o setor pega a rota e busca a função no controller shapedile 
     setorInput.addEventListener("blur", function () {
         const setor = setorInput.value.trim(); // pega o setor digitado
         if (!setor) return; // se vazio, não faz nada
@@ -215,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
-    // ======== QUANDO SELECIONAR UM TALHÃO ========
+    // quando selecionar um talhoa
     talhaoSelect.addEventListener("change", function () {
         const escolhido = talhaoSelect.value; // talhão escolhido
 
@@ -242,7 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
         destacarTalhao(item); // destaca o talhão no mapa
     });
 
-    // botões de adicionar (mantive os seus handlers)
+    // botao para adicionar corte
     const btnCorte = document.getElementById("addCorte");
     if (btnCorte) {
         btnCorte.addEventListener("click", function () {
@@ -258,7 +257,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-
+// botao para adicionar variedades
     const btnVar = document.getElementById("addVariedade");
     if (btnVar) {
         btnVar.addEventListener("click", function () {

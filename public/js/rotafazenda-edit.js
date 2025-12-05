@@ -1,10 +1,10 @@
-// =================== GLOBALS ===================
+// Variaveis globais
 let map = null;
 let talhoesLayerGroup = L.layerGroup();
 let destaqueLayer = null;
 let coordinatesData = []; // dados agrupados por talhão
 
-// =================== INICIAR MAPA ===================
+// funcao para iniciar o mapa 
 function iniciarMapaEdicao() {
     map = L.map("map-cadastro").setView([-21.9269, -46.9247], 15);
 
@@ -30,7 +30,7 @@ function iniciarMapaEdicao() {
     talhoesLayerGroup.addTo(map);
 }
 
-// =================== NORMALIZAR COORDENADAS ===================
+// funcao para normalizar as coordenadas 
 function normalizePoint(lat, lng) {
     lat = typeof lat === "string" ? parseFloat(lat.replace(",", ".")) : lat;
     lng = typeof lng === "string" ? parseFloat(lng.replace(",", ".")) : lng;
@@ -46,7 +46,7 @@ function normalizePoint(lat, lng) {
     return [lat, lng];
 }
 
-// ===================== DESENHAR TODOS OS TALHÕES =====================
+// Desenhar todos os talhoes no mapa 
 function desenharTalhoes(lista) {
     talhoesLayerGroup.clearLayers(); // limpa polígonos antigos
 
@@ -113,7 +113,7 @@ function desenharTalhoes(lista) {
     }
 }
 
-// ===================== DESTACAR TALHÃO SELECIONADO =====================
+//  Funçao para destar os talhoes
 function destacarTalhao(item) {
     if (destaqueLayer) {
         // remove destaque anterior
@@ -149,7 +149,7 @@ function destacarTalhao(item) {
     });
 }
 
-// =================== MAIN EDIT ===================
+// main do edit ao carregar a pagina
 document.addEventListener("DOMContentLoaded", async function () {
 
     const setorInput = document.querySelector('#setor');
@@ -171,8 +171,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             .then(data => {
 
                 const raw = data.coordinatesArray;
-
-                // AGRUPAR igual ao CREATE
                 const agrup = {};
                 raw.forEach(p => {
                     if (!agrup[p.talhao]) {
@@ -210,8 +208,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
     }
 
-    // ==== EVENTOS EXISTENTES DO SEU EDIT MANTIDOS ==== 
-// ==== QUANDO TROCAR O SETOR → ATUALIZAR TUDO (MAPA + SELECT + CAMPOS) ====
+// Quando trocar de setor atualiza o mapa, talhao e os campos
 setorInput.addEventListener("change", function () {
     const setor = setorInput.value.trim();
 
@@ -228,9 +225,7 @@ setorInput.addEventListener("change", function () {
         return;
     }
 
-    // ================================
-    // 1) Buscar SHAPE do novo setor
-    // ================================
+    // Buscar SHAPE do novo setor
     fetch(`/rotafazenda/shape/${setor}`)
         .then(res => res.json())
         .then(data => {
@@ -272,9 +267,8 @@ setorInput.addEventListener("change", function () {
             }
         });
 
-    // ================================
-    // 2) Buscar DADOS gerais (fazenda, área, corte, variedade)
-    // ================================
+    
+    // Buscar dados gerais (fazenda, área, corte, variedade)
     fetch(`/rotafazenda/buscar/${setor}/0`)
         .then(res => res.json())
         .then(data => {
@@ -296,19 +290,19 @@ setorInput.addEventListener("change", function () {
 
         if (!setor || !talhao) return;
 
-        // atualizar área
+        // atualizar a área do talhao
         fetch(`/rotafazenda/buscar/${setor}/${talhao}`)
             .then(res => res.json())
             .then(data => {
                 areaInput.value = data.area ?? "";
             });
 
-        // destacar talhão no mapa
+        // destacar talhao no mapa
         const item = coordinatesData.find(t => t.talhao == talhao);
         if (item) destacarTalhao(item);
     });
 
-    // ==== botões adicionar corte/variedade (mantidos) ====
+    // botoes adicionar corte
     document.getElementById("addCorte").addEventListener("click", function () {
         let novoCorte = prompt("Digite o novo corte:");
         if (novoCorte) {
@@ -320,7 +314,7 @@ setorInput.addEventListener("change", function () {
             corteSelect.appendChild(option);
         }
     });
-
+    //botoes adicionar variedade
     document.getElementById("addVariedade").addEventListener("click", function () {
         let novaVariedade = prompt("Digite a nova variedade:");
         if (novaVariedade) {
