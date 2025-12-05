@@ -4,89 +4,6 @@ let talhoesLayerGroup = L.layerGroup();
 let destaqueLayer = null;
 let coordinatesData = []; // dados agrupados por talhão
 
-// =================== NORMALIZAR COORDENADAS ===================
-function normalizePoint(lat, lng) {
-    lat = typeof lat === "string" ? parseFloat(lat.replace(",", ".")) : lat;
-    lng = typeof lng === "string" ? parseFloat(lng.replace(",", ".")) : lng;
-
-    if (isNaN(lat) || isNaN(lng)) return null;
-
-    if (Math.abs(lat) > 90 && Math.abs(lng) <= 90) {
-        const tmp = lat;
-        lat = lng;
-        lng = tmp;
-    }
-
-    return [lat, lng];
-}
-
-// =================== DESENHAR TALHÕES ===================
-function desenharTalhoes(lista) {
-    talhoesLayerGroup.clearLayers();
-    const allBounds = [];
-
-    lista.forEach(item => {
-        const pts = item.coordinates
-            .map(c => normalizePoint(c[0], c[1]))
-            .filter(Boolean);
-
-        if (pts.length < 3) return;
-
-        const polygon = L.polygon(pts, {
-            color: "orange",
-            weight: 2,
-            fillColor: "yellow",
-            fillOpacity: 0.35
-        }).bindPopup(`
-            <b>Talhão:</b> ${item.talhao}<br>
-            <b>Área:</b> ${item.area ?? "—"}
-        `);
-
-        const center = polygon.getBounds().getCenter();
-        const label = L.marker(center, {
-            icon: L.divIcon({
-                className: "talhao-label",
-                html: `<b>${item.talhao}</b>`,
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
-            })
-        });
-
-        talhoesLayerGroup.addLayer(label);
-        talhoesLayerGroup.addLayer(polygon);
-        allBounds.push(polygon.getBounds());
-    });
-
-    if (allBounds.length) {
-        const totalBounds = allBounds.reduce((acc, b) => acc.extend(b), allBounds[0]);
-        map.fitBounds(totalBounds, { maxZoom: 18, padding: [20, 20] });
-    }
-}
-
-// =================== DESTACAR TALHÃO ===================
-function destacarTalhao(item) {
-    if (destaqueLayer) {
-        map.removeLayer(destaqueLayer);
-        destaqueLayer = null;
-    }
-
-    const pts = item.coordinates
-        .map(c => normalizePoint(c[0], c[1]))
-        .filter(Boolean);
-
-    destaqueLayer = L.polygon(pts, {
-        color: "#2196F3",
-        weight: 3,
-        fillColor: "#64B5F6",
-        fillOpacity: 0.4
-    }).addTo(map);
-
-    map.fitBounds(destaqueLayer.getBounds(), {
-        maxZoom: 17,
-        padding: [20, 20]
-    });
-}
-
 // =================== INICIAR MAPA ===================
 function iniciarMapaEdicao() {
     map = L.map("map-cadastro").setView([-21.9269, -46.9247], 15);
@@ -111,6 +28,125 @@ function iniciarMapaEdicao() {
     L.control.layers(baseMaps).addTo(map);
 
     talhoesLayerGroup.addTo(map);
+}
+
+// =================== NORMALIZAR COORDENADAS ===================
+function normalizePoint(lat, lng) {
+    lat = typeof lat === "string" ? parseFloat(lat.replace(",", ".")) : lat;
+    lng = typeof lng === "string" ? parseFloat(lng.replace(",", ".")) : lng;
+
+    if (isNaN(lat) || isNaN(lng)) return null;
+
+    if (Math.abs(lat) > 90 && Math.abs(lng) <= 90) {
+        const tmp = lat;
+        lat = lng;
+        lng = tmp;
+    }
+
+    return [lat, lng];
+}
+
+// ===================== DESENHAR TODOS OS TALHÕES =====================
+function desenharTalhoes(lista) {
+    talhoesLayerGroup.clearLayers(); // limpa polígonos antigos
+
+    const allBounds = []; // armazena limites de cada polígono
+
+    lista.forEach((item) => {
+        if (!Array.isArray(item.coordinates) || item.coordinates.length === 0)
+            return; // ignora sem coords
+
+        const pts = []; // lista final de pontos normalizados
+
+        // normaliza cada ponto recebido
+        for (const c of item.coordinates) {
+            let normalized = null;
+
+            if (Array.isArray(c) && c.length >= 2) {
+                normalized = normalizePoint(c[0], c[1]);
+            } else if (c && "latitude" in c && "longitude" in c) {
+                normalized = normalizePoint(c.latitude, c.longitude);
+            }
+            if (normalized) pts.push(normalized);
+        }
+
+        if (pts.length < 3) return; // precisa de pelo menos 3 pontos para formar um polígono
+
+        // cria o polígono do talhão
+        const polygon = L.polygon(pts, {
+            color: "orange", // cor da borda
+            weight: 2, // espessura
+            fillColor: "yellow", // cor interna
+            fillOpacity: 0.35, // transparência
+        }).bindPopup(`
+            <b>Talhão:</b> ${item.talhao}<br>
+            <b>Área:</b> ${item.area ?? "—"}
+        `);
+
+        // obtém o centro do polígono para colocar a label
+        const center = polygon.getBounds().getCenter();
+
+        // cria a label numerada do talhão
+        const label = L.marker(center, {
+            icon: L.divIcon({
+                className: "talhao-label", // classe CSS personalizada
+                html: `<b>${item.talhao}</b>`, // número exibido
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+            }),
+        });
+
+        // adiciona label e polígono ao grupo de camadas
+        talhoesLayerGroup.addLayer(label);
+        talhoesLayerGroup.addLayer(polygon);
+
+        allBounds.push(polygon.getBounds()); // guarda limites para ajustar zoom
+    });
+
+    // ajusta zoom para mostrar todos
+    if (allBounds.length) {
+        const totalBounds = allBounds.reduce(
+            (acc, b) => acc.extend(b),
+            allBounds[0]
+        );
+        map.fitBounds(totalBounds, { maxZoom: 18, padding: [20, 20] });
+    }
+}
+
+// ===================== DESTACAR TALHÃO SELECIONADO =====================
+function destacarTalhao(item) {
+    if (destaqueLayer) {
+        // remove destaque anterior
+        map.removeLayer(destaqueLayer);
+        destaqueLayer = null;
+    }
+
+    if (!item) return; // se nada selecionado, sai
+
+    // normaliza pontos do talhão selecionado
+    const pts = item.coordinates
+        .map((c) => {
+            if (Array.isArray(c)) return normalizePoint(c[0], c[1]);
+            if (c && "latitude" in c && "longitude" in c)
+                return normalizePoint(c.latitude, c.longitude);
+            return null;
+        }).filter(Boolean); // remove nulls
+
+    if (pts.length < 1) return;
+
+    // cria polígono destacado
+    destaqueLayer = L.polygon(pts, {
+        color: "#2196F3", // cor azul da borda
+        weight: 3, // espessura
+        fillColor: "#64B5F6",// cor interna
+        fillOpacity: 0.4, //transparencia
+    }).addTo(map);
+
+    // ajusta zoom para caber o talhão selecionado
+    map.fitBounds(destaqueLayer.getBounds(), {
+        maxZoom: 15,
+        padding: [20, 20],
+    });
 }
 
 // =================== MAIN EDIT ===================

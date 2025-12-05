@@ -323,19 +323,19 @@ class RotafazendaController extends Controller
 
 
             //verifica se nome, talhao e area foi encontrado no bloco 
-            if (isset($structuredData['NOME'], $structuredData['TALHAO'], $structuredData['AREA'])) {
+            if (isset($structuredData['NOME'], $structuredData['TALHAO'], $structuredData['AREA_HA'])) {
                 $parts = explode("-", $structuredData['NOME']);
                 $descricaoFazenda = trim($parts[1]);
                 //guarda talaho e area
                 $talhao = $structuredData['TALHAO'];
-                $area = $structuredData['AREA'];
+                $area = $structuredData['AREA_HA'];
 
                 // Log::info("Processando Fazenda: " . $structuredData['NOME'] . ", Talhão: " . $talhao . ", Área: " . $area);
                 
                 
                 // Verifica se essa combinação já existe
                 //cria uma chave composta com nome mais o talhao e a area, para identificar fazenda e o talhao
-                $key = $structuredData['NOME'] . $structuredData['TALHAO'] . $structuredData['AREA'];
+                $key = $structuredData['NOME'] . $structuredData['TALHAO'] . $structuredData['AREA_HA'];
                 if (!isset($uniqueFazendas[$key])) {
                     $uniqueFazendas[$key] = true; // Marca como existente
 
@@ -378,7 +378,7 @@ class RotafazendaController extends Controller
                     }
                 }
             }
-
+            
             // Remove a ocorrência processada para continuar com a próxima
             $content = str_replace($matches[0], '', $content);
         }
@@ -395,7 +395,8 @@ class RotafazendaController extends Controller
             'erro' => false,
             'talhoes' => $listaTalhoes,
             'fazendaArray' => $fazendaArray,
-            'coordinatesArray' => $coordinatesArray,           
+            'coordinatesArray' => $coordinatesArray, 
+            Log::info($coordinatesArray),   
         ]);
     }
 }
