@@ -83,6 +83,31 @@ function desenharTalhoes(lista) {
             <b>Área:</b> ${item.area ?? "—"}
         `);
 
+             // 👉 ADICIONE ISTO AQUI
+        polygon.on("click", () => {
+            const talhaoSelect = document.querySelector("#talhao");
+
+            // altera o select para o talhão clicado
+            talhaoSelect.value = item.talhao;
+
+            // destaca o talhão no mapa
+            destacarTalhao(item);
+
+            // opcional: preencher área
+            const areaInput = document.querySelector('input[name="area"]');
+
+            if (item.area != null && item.area !== "") {
+                // transforma vírgula em ponto → converte para número → 2 casas decimais
+                const areaFormatada = Number(
+                    String(item.area).replace(",", ".")
+                ).toFixed(2);
+
+                areaInput.value = areaFormatada;
+            } else {
+                areaInput.value = "";
+            }
+        });
+
         // obtém o centro do polígono para colocar a label
         const center = polygon.getBounds().getCenter();
 
