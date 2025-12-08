@@ -6,6 +6,8 @@ use App\Models\Rotafazenda;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+
 
 class RotafazendaController extends Controller
 {
@@ -200,10 +202,8 @@ class RotafazendaController extends Controller
             ->with('mensagem.sucesso', "Fazenda '{$rotafazenda->fazenda}' deletada com sucesso!");
     }
 
-    public function mapaSetor($setor){
+    public function mapaSetor($setor) {}
 
-    }
-    
     public function mapa($setor, $talhao)
     {
         $path = public_path('storage/uploads/doc.kml');
@@ -259,6 +259,13 @@ class RotafazendaController extends Controller
 
     function shapefile($setor)
     {
+
+        $cacheKey = 'shapefile_setor_' . $setor;
+
+        // Se estiver no cache → retorna direto (instantâneo)
+        if (Cache::has($cacheKey)) {
+            return response()->json(Cache::get($cacheKey));
+        }
         //inicia as veriaveis
         //$setor = $request->setor;
         $fazendaArray = [];
@@ -316,8 +323,8 @@ class RotafazendaController extends Controller
                     $structuredData[$tdArray[$i]] = $tdArray[$i + 1];
                 }
             }
-             Log::info($structuredData);
-               
+            Log::info($structuredData);
+
             // Log::info(isset($structuredData['NOME'], $structuredData['TALHAO'], $structuredData['AREA']));
             // Log::info($structuredData['NOME'], $structuredData['TALHAO'], $structuredData['AREA']);
 
@@ -331,8 +338,8 @@ class RotafazendaController extends Controller
                 $area = $structuredData['AREA_HA'];
 
                 // Log::info("Processando Fazenda: " . $structuredData['NOME'] . ", Talhão: " . $talhao . ", Área: " . $area);
-                
-                
+
+
                 // Verifica se essa combinação já existe
                 //cria uma chave composta com nome mais o talhao e a area, para identificar fazenda e o talhao
                 $key = $structuredData['NOME'] . $structuredData['TALHAO'] . $structuredData['AREA_HA'];
@@ -347,7 +354,7 @@ class RotafazendaController extends Controller
                 // Processa as coordenadas para este intervalo
                 //procura as tags dentro do mesmo bloco
                 $patternCoordenadas = '/<coordinates>(.*?)<\/coordinates>/s';
-                
+
                 //capta todos os blocos de coordenadas 
                 preg_match_all($patternCoordenadas, $intervalContent, $coordMatches);
 
@@ -372,13 +379,13 @@ class RotafazendaController extends Controller
                                     'latitude' => (float)$latitude,
                                     'longitude' => (float)$longitude,
                                     'altitude' => (float)$altitude,
-                                ];  
+                                ];
                             }
                         }
                     }
                 }
             }
-            
+
             // Remove a ocorrência processada para continuar com a próxima
             $content = str_replace($matches[0], '', $content);
         }
@@ -387,16 +394,19 @@ class RotafazendaController extends Controller
         if (empty($coordinatesArray)) {
             return response()->json(['erro' => true, 'mensagem' => 'Nenhum dado encontrado para o setor.']);
         }
-        
+
         //array_column extrai todos os valores de talhao
         //array_unique remove dados duplicados 
         $listaTalhoes = array_unique(array_column($coordinatesArray, 'talhao'));
-        return response()->json([
+        $resultado = [
             'erro' => false,
             'talhoes' => $listaTalhoes,
             'fazendaArray' => $fazendaArray,
-            'coordinatesArray' => $coordinatesArray, 
+            'coordinatesArray' => $coordinatesArray,
             // Log::info($coordinatesArray),   
-        ]);
+        ];
+        Cache::put($cacheKey, $resultado, now()->addHours(24));
+
+        return response()->json($resultado);
     }
 }

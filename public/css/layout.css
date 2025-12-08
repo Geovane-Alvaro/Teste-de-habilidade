@@ -183,3 +183,8 @@ body {
     height: 30px;
     font-weight: bold;
 }
+
+.destaque-label {
+    color: #2196F3 !important; /* azul igual ao polígono */
+
+}

@@ -3,8 +3,9 @@ let map = null;
 let talhoesLayerGroup = L.layerGroup();
 let destaqueLayer = null;
 let coordinatesData = []; // dados agrupados por talhão
+let labelsMap = {}; // armazena as labels por talhão
 
-// funcao para iniciar o mapa 
+// funcao para iniciar o mapa
 function iniciarMapaEdicao() {
     map = L.map("map-cadastro").setView([-21.9269, -46.9247], 15);
 
@@ -22,7 +23,7 @@ function iniciarMapaEdicao() {
 
     const baseMaps = {
         Claro: tileLayerClaro,
-        Escuro: tileLayerEscuro
+        Escuro: tileLayerEscuro,
     };
 
     L.control.layers(baseMaps).addTo(map);
@@ -30,7 +31,7 @@ function iniciarMapaEdicao() {
     talhoesLayerGroup.addTo(map);
 }
 
-// funcao para normalizar as coordenadas 
+// funcao para normalizar as coordenadas
 function normalizePoint(lat, lng) {
     lat = typeof lat === "string" ? parseFloat(lat.replace(",", ".")) : lat;
     lng = typeof lng === "string" ? parseFloat(lng.replace(",", ".")) : lng;
@@ -46,7 +47,7 @@ function normalizePoint(lat, lng) {
     return [lat, lng];
 }
 
-// Desenhar todos os talhoes no mapa 
+// Desenhar todos os talhoes no mapa
 function desenharTalhoes(lista) {
     talhoesLayerGroup.clearLayers(); // limpa polígonos antigos
 
@@ -83,6 +84,30 @@ function desenharTalhoes(lista) {
             <b>Área:</b> ${item.area ?? "—"}
         `);
 
+        // 👉 ADICIONE ISTO AQUI
+        polygon.on("click", () => {
+            const talhaoSelect = document.querySelector("#talhao");
+
+            // altera o select para o talhão clicado
+            talhaoSelect.value = item.talhao;
+
+            // destaca o talhão no mapa
+            destacarTalhao(item);
+
+            // opcional: preencher área
+            const areaInput = document.querySelector('input[name="area"]');
+
+            if (item.area != null && item.area !== "") {
+                // transforma vírgula em ponto → converte para número → 2 casas decimais
+                const areaFormatada = Number(
+                    String(item.area).replace(",", ".")
+                ).toFixed(2);
+
+                areaInput.value = areaFormatada;
+            } else {
+                areaInput.value = "";
+            }
+        });
         // obtém o centro do polígono para colocar a label
         const center = polygon.getBounds().getCenter();
 
@@ -96,6 +121,7 @@ function desenharTalhoes(lista) {
             }),
         });
 
+        labelsMap[item.talhao] = label; // salva label para uso posterior
         // adiciona label e polígono ao grupo de camadas
         talhoesLayerGroup.addLayer(label);
         talhoesLayerGroup.addLayer(polygon);
@@ -113,15 +139,33 @@ function desenharTalhoes(lista) {
     }
 }
 
-//  Funçao para destar os talhoes
-function destacarTalhao(item) {
+function limparDestaques() {
+    // remover polígono destacado
     if (destaqueLayer) {
-        // remove destaque anterior
         map.removeLayer(destaqueLayer);
         destaqueLayer = null;
     }
 
-    if (!item) return; // se nada selecionado, sai
+    // resetar todas as labels para cor normal
+    Object.values(labelsMap).forEach((lbl) => {
+        const icon = lbl.getIcon();
+        icon.options.className = "talhao-label"; // estilo padrão
+        lbl.setIcon(icon);
+    });
+}
+
+//  Funçao para destar os talhoes
+function destacarTalhao(item) {
+    //chama função para limpar o destaque do talhao antigo
+    limparDestaques();
+
+    // 🔵 APLICAR COR ESPECIAL À LABEL DO TALHÃO SELECIONADO
+    const lbl = labelsMap[item.talhao];
+    if (lbl) {
+        const icon = lbl.getIcon();
+        icon.options.className = "talhao-label destaque-label";
+        lbl.setIcon(icon);
+    }
 
     // normaliza pontos do talhão selecionado
     const pts = item.coordinates
@@ -130,7 +174,8 @@ function destacarTalhao(item) {
             if (c && "latitude" in c && "longitude" in c)
                 return normalizePoint(c.latitude, c.longitude);
             return null;
-        }).filter(Boolean); // remove nulls
+        })
+        .filter(Boolean); // remove nulls
 
     if (pts.length < 1) return;
 
@@ -138,22 +183,23 @@ function destacarTalhao(item) {
     destaqueLayer = L.polygon(pts, {
         color: "#2196F3", // cor azul da borda
         weight: 3, // espessura
-        fillColor: "#64B5F6",// cor interna
-        fillOpacity: 0.4, //transparencia
+        fillColor: "#96cbf7ff", // cor interna
+        fillOpacity: 1.0, //transparencia
     }).addTo(map);
 
     // ajusta zoom para caber o talhão selecionado
-    map.fitBounds(destaqueLayer.getBounds(), {
-        maxZoom: 15,
-        padding: [20, 20],
-    });
+    setTimeout(() => {
+        map.fitBounds(destaqueLayer.getBounds(), {
+            maxZoom: 15,
+            padding: [20, 20],
+        });
+    }, 50);
 }
 
 // main do edit ao carregar a pagina
 document.addEventListener("DOMContentLoaded", async function () {
-
-    const setorInput = document.querySelector('#setor');
-    const talhaoSelect = document.querySelector('#talhao');
+    const setorInput = document.querySelector("#setor");
+    const talhaoSelect = document.querySelector("#talhao");
     const fazendaInput = document.querySelector('input[name="fazenda"]');
     const areaInput = document.querySelector('input[name="area"]');
     const corteSelect = document.querySelector("#corte");
@@ -167,18 +213,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (setor) {
         // Buscar SHAPE e desenhar no mapa
         fetch(`/rotafazenda/shape/${setor}`)
-            .then(res => res.json())
-            .then(data => {
-
+            .then((res) => res.json())
+            .then((data) => {
                 const raw = data.coordinatesArray;
                 const agrup = {};
-                raw.forEach(p => {
+                raw.forEach((p) => {
                     if (!agrup[p.talhao]) {
                         agrup[p.talhao] = {
                             talhao: p.talhao,
                             area: p.area ?? null,
                             descricaoFazenda: p.descricaoFazenda ?? null,
-                            coordinates: []
+                            coordinates: [],
                         };
                     }
 
@@ -191,8 +236,9 @@ document.addEventListener("DOMContentLoaded", async function () {
                 desenharTalhoes(coordinatesData);
 
                 // recriar select talhão
-                talhaoSelect.innerHTML = '<option value="">Selecione um talhão</option>';
-                coordinatesData.forEach(t => {
+                talhaoSelect.innerHTML =
+                    '<option value="">Selecione um talhão</option>';
+                coordinatesData.forEach((t) => {
                     const opt = document.createElement("option");
                     opt.value = t.talhao;
                     opt.textContent = t.talhao;
@@ -203,86 +249,87 @@ document.addEventListener("DOMContentLoaded", async function () {
                 if (talhaoAtual) talhaoSelect.value = talhaoAtual;
 
                 // destacar talhão atual
-                const item = coordinatesData.find(t => t.talhao == talhaoAtual);
+                const item = coordinatesData.find(
+                    (t) => t.talhao == talhaoAtual
+                );
                 if (item) destacarTalhao(item);
             });
     }
 
-// Quando trocar de setor atualiza o mapa, talhao e os campos
-setorInput.addEventListener("change", function () {
-    const setor = setorInput.value.trim();
+    // Quando trocar de setor atualiza o mapa, talhao e os campos
+    setorInput.addEventListener("change", function () {
+        const setor = setorInput.value.trim();
 
-    // limpar select de talhão
-    talhaoSelect.innerHTML = '<option value="">Selecione um talhão</option>';
-    areaInput.value = "";
+        // limpar select de talhão
+        talhaoSelect.innerHTML =
+            '<option value="">Selecione um talhão</option>';
+        areaInput.value = "";
 
-    if (!setor) {
-        talhoesLayerGroup.clearLayers();
-        if (destaqueLayer) {
-            map.removeLayer(destaqueLayer);
-            destaqueLayer = null;
-        }
-        return;
-    }
-
-    // Buscar SHAPE do novo setor
-    fetch(`/rotafazenda/shape/${setor}`)
-        .then(res => res.json())
-        .then(data => {
-
-            const raw = data.coordinatesArray;
-
-            // Agrupar por talhão (igual ao create)
-            const agrup = {};
-            raw.forEach(p => {
-                if (!agrup[p.talhao]) {
-                    agrup[p.talhao] = {
-                        talhao: p.talhao,
-                        area: p.area ?? null,
-                        descricaoFazenda: p.descricaoFazenda ?? null,
-                        coordinates: []
-                    };
-                }
-                agrup[p.talhao].coordinates.push([p.latitude, p.longitude]);
-            });
-
-            coordinatesData = Object.values(agrup);
-
-            // desenhar todos os talhões
-            desenharTalhoes(coordinatesData);
-
-            // Preencher SELECT de talhões
-            talhaoSelect.innerHTML = '<option value="">Selecione um talhão</option>';
-            coordinatesData.forEach(t => {
-                const opt = document.createElement("option");
-                opt.value = t.talhao;
-                opt.textContent = t.talhao;
-                talhaoSelect.appendChild(opt);
-            });
-
-            // Remover destaque anterior
+        if (!setor) {
+            talhoesLayerGroup.clearLayers();
             if (destaqueLayer) {
                 map.removeLayer(destaqueLayer);
                 destaqueLayer = null;
             }
-        });
+            return;
+        }
 
-    
-    // Buscar dados gerais (fazenda, área, corte, variedade)
-    fetch(`/rotafazenda/buscar/${setor}/0`)
-        .then(res => res.json())
-        .then(data => {
-            fazendaInput.value = data.fazenda ?? "";
+        // Buscar SHAPE do novo setor
+        fetch(`/rotafazenda/shape/${setor}`)
+            .then((res) => res.json())
+            .then((data) => {
+                const raw = data.coordinatesArray;
 
-            if (!talhaoSelect.value) {
-                areaInput.value = data.area ?? "";
-            }
+                // Agrupar por talhão (igual ao create)
+                const agrup = {};
+                raw.forEach((p) => {
+                    if (!agrup[p.talhao]) {
+                        agrup[p.talhao] = {
+                            talhao: p.talhao,
+                            area: p.area ?? null,
+                            descricaoFazenda: p.descricaoFazenda ?? null,
+                            coordinates: [],
+                        };
+                    }
+                    agrup[p.talhao].coordinates.push([p.latitude, p.longitude]);
+                });
 
-            if (data.corte) corteSelect.value = data.corte;
-            if (data.variedade) variedadeSelect.value = data.variedade;
-        });
-});
+                coordinatesData = Object.values(agrup);
 
+                // desenhar todos os talhões
+                desenharTalhoes(coordinatesData);
+
+                // Preencher SELECT de talhões
+                talhaoSelect.innerHTML =
+                    '<option value="">Selecione um talhão</option>';
+                coordinatesData.forEach((t) => {
+                    const opt = document.createElement("option");
+                    opt.value = t.talhao;
+                    opt.textContent = t.talhao;
+                    talhaoSelect.appendChild(opt);
+                });
+
+                // Remover destaque anterior
+                if (destaqueLayer) {
+                    map.removeLayer(destaqueLayer);
+                    destaqueLayer = null;
+                }
+            });
+
+        // Buscar dados gerais (fazenda, área, corte, variedade)
+        fetch(`/rotafazenda/buscar/${setor}/0`)
+            .then((res) => res.json())
+            .then((data) => {
+                fazendaInput.value = data.fazenda ?? "";
+
+                if (!talhaoSelect.value) {
+                    areaInput.value = data.area ?? "";
+                }
+
+                if (data.corte) corteSelect.value = data.corte;
+                if (data.variedade) variedadeSelect.value = data.variedade;
+            });
+    });
 
     talhaoSelect.addEventListener("change", function () {
         const setor = setorInput.value.trim();
@@ -292,13 +339,13 @@ setorInput.addEventListener("change", function () {
 
         // atualizar a área do talhao
         fetch(`/rotafazenda/buscar/${setor}/${talhao}`)
-            .then(res => res.json())
-            .then(data => {
+            .then((res) => res.json())
+            .then((data) => {
                 areaInput.value = data.area ?? "";
             });
 
         // destacar talhao no mapa
-        const item = coordinatesData.find(t => t.talhao == talhao);
+        const item = coordinatesData.find((t) => t.talhao == talhao);
         if (item) destacarTalhao(item);
     });
 
@@ -315,15 +362,17 @@ setorInput.addEventListener("change", function () {
         }
     });
     //botoes adicionar variedade
-    document.getElementById("addVariedade").addEventListener("click", function () {
-        let novaVariedade = prompt("Digite a nova variedade:");
-        if (novaVariedade) {
-            novaVariedade = novaVariedade.toUpperCase();
-            const option = document.createElement("option");
-            option.value = novaVariedade;
-            option.textContent = novaVariedade;
-            option.selected = true;
-            variedadeSelect.appendChild(option);
-        }
-    });
+    document
+        .getElementById("addVariedade")
+        .addEventListener("click", function () {
+            let novaVariedade = prompt("Digite a nova variedade:");
+            if (novaVariedade) {
+                novaVariedade = novaVariedade.toUpperCase();
+                const option = document.createElement("option");
+                option.value = novaVariedade;
+                option.textContent = novaVariedade;
+                option.selected = true;
+                variedadeSelect.appendChild(option);
+            }
+        });
 });
